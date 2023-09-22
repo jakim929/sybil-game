@@ -1,0 +1,52 @@
+{
+  "name": "sybil-game",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "add:shadcn": "pnpm exec shadcn-ui add",
+    "format": "biome format . --write",
+    "format:check": "biome format .",
+    "lint": "biome check . --apply-unsafe",
+    "lint:check": "biome check . --verbose",
+    "preinstall": "npx only-allow pnpm",
+    "anvil": "source .env && anvil --fork-url $VITE_JSON_RPC_URL --block-time 2",
+    "deploy:anvil": "source .env && forge create contracts/src/SybilGame.sol:SybilGame --rpc-url http://127.0.0.1:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --constructor-args-path deploy-args-op-goerli "
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
+    "@tanstack/react-query": "^4.35.3",
+    "@walletconnect/sign-client": "2.9.0",
+    "@web3modal/wagmi": "3.0.0-beta.4",
+    "@worldcoin/idkit": "^0.5.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.274.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.16.0",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7",
+    "viem": "^1.11.0",
+    "vite-plugin-svgr": "^4.0.0",
+    "wagmi": "^1.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.1.0",
+    "@types/node": "^20.5.9",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.15",
+    "daisyui": "^3.7.7",
+    "postcss": "^8.4.29",
+    "shadcn-ui": "^0.3.0",
+    "solc": "^0.8.21",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  }
+}
