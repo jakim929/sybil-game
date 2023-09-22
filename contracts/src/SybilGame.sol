@@ -21,8 +21,8 @@ contract SybilGame is Owned {
     enum RoundState { Commit, Reveal }
 
 
-    uint256 constant public COMMIT_DURATION = 5 minutes;
-    uint256 constant public REVEAL_DURATION = 2 minutes;
+    uint256 constant public COMMIT_DURATION = 1 minutes;
+    uint256 constant public REVEAL_DURATION = 1 minutes;
 
 
     event PlayerRegisteredForRound(uint256 round, address indexed playerAddress);
