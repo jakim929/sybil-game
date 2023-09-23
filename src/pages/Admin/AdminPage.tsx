@@ -272,12 +272,23 @@ const GameStatusBoard = () => {
 const SubmitQuestionButton = () => {
   const gameAddress = useCurrentGameContractAddressContext()
   const { currentRound, currentRoundIndex, isLoading } = useCurrentRound()
+  const { gameState, isLoading: isGameStateLoading } = useGameState()
 
-  if (isLoading || currentRoundIndex === undefined || !currentRound) {
+  if (
+    isLoading ||
+    currentRoundIndex === undefined ||
+    !currentRound ||
+    isGameStateLoading ||
+    gameState === undefined
+  ) {
     return <div>'Loading...'</div>
   }
 
-  const question = questionsByRound[Number(currentRoundIndex)].question
+  const question =
+    gameState === 0
+      ? questionsByRound[Number(currentRoundIndex)].question
+      : questionsByRound[Number(currentRoundIndex) + 1].question
+
   const { write } = useContractWrite({
     address: gameAddress,
     abi: SybilGameAbi,

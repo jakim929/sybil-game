@@ -1,7 +1,7 @@
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { WorldIdVerificationResponse } from '@/lib/worldIdVerification'
 import { usePrepareContractWrite, useContractWrite } from 'wagmi'
-import WorldIDAppImage from '@/assets/worldid-app.jpg'
+import MascotImage from '@/assets/mascot.jpg'
 import { Address } from 'viem'
 
 import {
@@ -57,9 +57,9 @@ export const SignUpStep = ({
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-8">
         <img
-          src={WorldIDAppImage}
+          src={MascotImage}
           className="w-full rounded-lg"
-          aria-label="World ID image"
+          aria-label="mascot image"
         />
         <Button
           disabled={isButtonDisabled}

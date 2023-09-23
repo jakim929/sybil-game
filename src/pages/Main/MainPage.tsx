@@ -7,43 +7,45 @@ import { useIsSignedUp } from '@/lib/useIsSignedUp'
 import { SignUpStep } from '@/pages/Main/SignUpStep'
 import { Navigate } from 'react-router-dom'
 import { CenteredCardLayout } from '@/components/CenteredCardLayout'
+import WorldIdBackground from '@/assets/worldid-background.jpg'
+import FairlyandBackground from '@/assets/fairlyland-background.jpg'
 
-const MainPageContent = () => {
+export const MainPage = () => {
   const { address } = useAccount()
   const [verificationResponse, setVerificationResponse] =
     useState<WorldIdVerificationResponse>()
   const isSignedUp = useIsSignedUp()
 
   if (!address) {
-    return <ConnectWalletStep />
+    return (
+      <CenteredCardLayout imageSrc={FairlyandBackground}>
+        <ConnectWalletStep />
+      </CenteredCardLayout>
+    )
   }
 
   if (!verificationResponse) {
     return (
-      <VerifyWithWorldIDStep
-        onSuccess={setVerificationResponse}
-        address={address}
-      />
+      <CenteredCardLayout imageSrc={WorldIdBackground}>
+        <VerifyWithWorldIDStep
+          onSuccess={setVerificationResponse}
+          address={address}
+        />
+      </CenteredCardLayout>
     )
   }
 
   if (!isSignedUp) {
     return (
-      <SignUpStep
-        verificationResponse={verificationResponse}
-        address={address}
-        reset={() => setVerificationResponse(undefined)}
-      />
+      <CenteredCardLayout imageSrc={WorldIdBackground}>
+        <SignUpStep
+          verificationResponse={verificationResponse}
+          address={address}
+          reset={() => setVerificationResponse(undefined)}
+        />
+      </CenteredCardLayout>
     )
   }
 
   return <Navigate to="/play" />
-}
-
-export const MainPage = () => {
-  return (
-    <CenteredCardLayout>
-      <MainPageContent />
-    </CenteredCardLayout>
-  )
 }
