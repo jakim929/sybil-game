@@ -1,19 +1,13 @@
-import { randomStringForEntropy } from '@stablelib/random'
+import { randomBytes } from '@stablelib/random'
 import { useState } from 'react'
-import { Hex, toHex } from 'viem'
+import { Hex, bytesToHex } from 'viem'
 
-const getNonce = () => {
-  const nonce = randomStringForEntropy(96)
-  if (!nonce || nonce.length < 8) {
-    throw new Error('Error during nonce creation.')
-  }
-  return toHex(nonce, { size: 32 })
-}
+const createNonce = () => bytesToHex(randomBytes(32))
 
 export const useNonce = () => {
-  const [nonce, setNonce] = useState<Hex>(getNonce())
+  const [nonce, setNonce] = useState<Hex>(createNonce())
   return {
     nonce,
-    resetNonce: () => setNonce(getNonce()),
+    resetNonce: () => setNonce(createNonce()),
   }
 }

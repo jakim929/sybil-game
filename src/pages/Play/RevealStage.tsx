@@ -26,12 +26,11 @@ const useRevealAnswer = ({
   submissionPayload: SubmissionPayload
   onSubmit: (payload: SubmissionPayload) => void
 }) => {
-  const { answer, nonce } = submissionPayload
   const { config } = usePrepareContractWrite({
     address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
     abi: SybilGameAbi,
     functionName: 'revealAnswer',
-    args: [answer, nonce],
+    args: [submissionPayload!.answer, submissionPayload!.nonce],
   })
 
   const {
@@ -102,14 +101,19 @@ export const RevealStage = ({
   answer: string
   submissionPayload: SubmissionPayload
 }) => {
+  console.log('reveal stage')
   const remainingSeconds = useRemainingSeconds(Number(deadline))
 
-  const { isLoading, write, hash } = useRevealAnswer({
+  const {
+    isLoading: isRevealAnswerLoading,
+    write,
+    hash,
+  } = useRevealAnswer({
     submissionPayload,
     onSubmit: (x) => console.log('successful submission', x),
   })
 
-  const shouldDisableSubmit = isLoading || remainingSeconds <= 0
+  const shouldDisableSubmit = isRevealAnswerLoading || remainingSeconds <= 0
 
   if (remainingSeconds <= 0) {
     return (
@@ -156,7 +160,7 @@ export const RevealStage = ({
           onClick={() => write?.()}
           className="w-full"
         >
-          {isLoading ? (
+          {isRevealAnswerLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Revealing answer...

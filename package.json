@@ -25,6 +25,7 @@
     "@worldcoin/idkit": "^0.5.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "immer": "^10.0.2",
     "lucide-react": "^0.274.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -33,7 +34,8 @@
     "tailwindcss-animate": "^1.0.7",
     "viem": "^1.11.0",
     "vite-plugin-svgr": "^4.0.0",
-    "wagmi": "^1.4.2"
+    "wagmi": "^1.4.2",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.0",

@@ -2,6 +2,7 @@ import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { GameCompleted } from '@/pages/Play/GameCompleted'
 import { GameInProgress } from '@/pages/Play/GameInProgress'
 import { GameNotStarted } from '@/pages/Play/GameNotStarted'
+import { Navigate } from 'react-router-dom'
 import { useAccount, useContractRead } from 'wagmi'
 
 const useIsPlayerRegisteredForCurrentRound = () => {
@@ -11,7 +12,6 @@ const useIsPlayerRegisteredForCurrentRound = () => {
       address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
       abi: SybilGameAbi,
       functionName: 'currentRoundIndex',
-      cacheOnBlock: true,
     })
 
   const { data: isRegistered, isLoading: isRoundRegisteredPlayersLoading } =
@@ -21,7 +21,6 @@ const useIsPlayerRegisteredForCurrentRound = () => {
       functionName: 'roundRegisteredPlayers',
       args: [currentRoundIndex!, address!],
       enabled: !!address && currentRoundIndex !== undefined,
-      cacheOnBlock: true,
     })
 
   const isLoading =
@@ -51,10 +50,13 @@ export const PlayPage = () => {
     useIsPlayerRegisteredForCurrentRound()
 
   const { gameState, isLoading: isGameStateLoading } = useGameState()
-  console.log('gameState', gameState, isGameStateLoading)
 
   if (isGameStateLoading || isPlayerRegisteredLoading) {
     return null //add better loading state
+  }
+
+  if (!isRegistered) {
+    return <Navigate to="/" />
   }
 
   // // NOT_STARTED
@@ -70,6 +72,5 @@ export const PlayPage = () => {
     return <GameCompleted />
   }
 
-  console.log(isRegistered, isPlayerRegisteredLoading)
   return <div>Play</div>
 }

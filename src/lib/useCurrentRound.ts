@@ -16,7 +16,6 @@ export const useCurrentRound = () => {
       },
     ],
     allowFailure: false,
-    cacheOnBlock: true,
   })
   return {
     currentRound: data?.[0],

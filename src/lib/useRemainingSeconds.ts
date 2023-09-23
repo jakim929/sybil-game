@@ -11,6 +11,10 @@ export const useRemainingSeconds = (deadline: number) => {
   )
 
   useEffect(() => {
+    if (remainingSeconds === 0) {
+      // No need to set an interval if the remainingSeconds is already 0
+      return
+    }
     const intervalID = setInterval(() => {
       setRemainingSeconds(calculateRemainingSeconds(deadline))
     }, 1000)

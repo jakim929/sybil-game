@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
 import { Loader2 } from 'lucide-react'
+import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
 
 export const SignUpStep = ({
   address,
@@ -24,14 +25,24 @@ export const SignUpStep = ({
   reset: () => void
 }) => {
   const { merkleRoot, nullifierHash, proof } = verificationResponse
-  const { config, error } = usePrepareContractWrite({
+  const {
+    config,
+    error,
+    isLoading: isConfigLoading,
+  } = usePrepareContractWrite({
     address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
     abi: SybilGameAbi,
     functionName: 'signUp',
     args: [address!, merkleRoot, nullifierHash, proof],
+    onSuccess: () => {
+      useSubmissionPayloadState.getState().reset()
+    },
   })
 
-  const { write, isLoading, data } = useContractWrite(config)
+  const { write, isLoading: isWriteLoading, data } = useContractWrite(config)
+
+  const isLoading = isConfigLoading || isWriteLoading || !!data
+  const isButtonDisabled = !write || isLoading
 
   return (
     <WidthRestrictedCard>
@@ -48,15 +59,15 @@ export const SignUpStep = ({
           aria-label="World ID image"
         />
         <Button
-          disabled={!write || isLoading}
+          disabled={isButtonDisabled}
           onClick={() => write!()}
           className="w-full"
         >
           {/* redirect will occur */}
-          {isLoading || data ? (
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Signing up...
+              {isConfigLoading ? 'Loading... ' : 'Signing up...'}
             </>
           ) : (
             <>Sign up</>

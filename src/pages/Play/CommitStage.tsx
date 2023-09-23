@@ -6,9 +6,10 @@ import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
+import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
+import { useCurrentRoundCommitment } from '@/lib/useCurrentRoundCommitment'
 import { useNonce } from '@/lib/useNonce'
 import { useRemainingSeconds } from '@/lib/useRemainingSeconds'
-import { SubmissionPayload } from '@/pages/Play/types'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { encodeAbiParameters, keccak256 } from 'viem'
@@ -20,32 +21,27 @@ import {
 
 const useSubmitAnswer = ({
   answer,
-  onSubmit,
 }: {
   answer?: string
-  onSubmit: (payload: SubmissionPayload) => void
 }) => {
+  const { setSubmissionPayload } = useSubmissionPayloadState()
   const { nonce } = useNonce()
-  console.log(nonce)
 
-  const commitHash = answer
+  const commitment = answer
     ? keccak256(
         encodeAbiParameters(
-          [
-            { type: 'string', name: 'x' },
-            { type: 'bytes', name: 'y' },
-          ],
+          [{ type: 'string' }, { type: 'bytes32' }],
           [answer, nonce],
         ),
       )
     : undefined
 
-  const { config } = usePrepareContractWrite({
+  const { config, isLoading: isConfigLoading } = usePrepareContractWrite({
     address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
     abi: SybilGameAbi,
     functionName: 'commitAnswer',
-    args: [commitHash!],
-    enabled: !!commitHash,
+    args: [commitment!],
+    enabled: !!commitment,
   })
 
   const {
@@ -54,19 +50,29 @@ const useSubmitAnswer = ({
     isLoading: isTransactionSubmissionLoading,
   } = useContractWrite(config)
 
-  const { isLoading: isTransactionConfirmationLoading } = useWaitForTransaction(
-    {
+  const { data: receipt, isLoading: isTransactionConfirmationLoading } =
+    useWaitForTransaction({
       hash: data?.hash,
-      onSuccess: () =>
-        onSubmit({ answer: answer!, nonce, commitment: commitHash! }),
-    },
-  )
+    })
 
   const isLoading =
-    isTransactionSubmissionLoading || isTransactionConfirmationLoading
+    isConfigLoading ||
+    isTransactionSubmissionLoading ||
+    isTransactionConfirmationLoading
   return {
     isLoading,
-    write,
+    write: write
+      ? () => {
+          setSubmissionPayload(commitment!, {
+            answer: answer!,
+            nonce,
+            commitment: commitment!,
+          })
+          return write()
+        }
+      : undefined,
+    transactionResponse: data,
+    transactionReceipt: receipt,
   }
 }
 
@@ -98,29 +104,27 @@ export const CommitStage = ({
   startTime,
   deadline,
   question,
-  onSuccess,
 }: {
   startTime: bigint
   deadline: bigint
   question: string
-  onSuccess: (payload: SubmissionPayload) => void
 }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>()
-  const [submissionPayload, setSubmissionPayload] =
-    useState<SubmissionPayload>()
+  console.log('commitStage')
 
-  const { isLoading: isSubmissionLoading, write } = useSubmitAnswer({
+  const {
+    isLoading: isSubmissionLoading,
+    write,
+    transactionReceipt,
+  } = useSubmitAnswer({
     answer: selectedAnswer,
-    onSubmit: (submissionPayload) => {
-      setSubmissionPayload(submissionPayload)
-      onSuccess(submissionPayload)
-    },
   })
+
+  const { commitment } = useCurrentRoundCommitment()
 
   const remainingSeconds = useRemainingSeconds(Number(deadline))
 
-  const shouldDisableSelect =
-    isSubmissionLoading || !!submissionPayload || remainingSeconds <= 0
+  const shouldDisableSelect = isSubmissionLoading || remainingSeconds <= 0
 
   if (remainingSeconds <= 0) {
     return (
@@ -131,8 +135,7 @@ export const CommitStage = ({
     )
   }
 
-  console.log(submissionPayload)
-  if (submissionPayload) {
+  if (commitment || transactionReceipt) {
     return (
       <WaitingForOthersCard
         startTime={startTime}
@@ -168,7 +171,7 @@ export const CommitStage = ({
         <div className="flex px-4">
           <SubmitAnswerButton
             onClick={() => write?.()}
-            isDisabled={!write || !selectedAnswer}
+            isDisabled={!write || !selectedAnswer || isSubmissionLoading}
             isLoading={isSubmissionLoading}
           />
         </div>
