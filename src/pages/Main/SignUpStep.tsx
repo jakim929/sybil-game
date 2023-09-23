@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
+import { Loader2 } from 'lucide-react'
 
 export const SignUpStep = ({
   address,
@@ -30,7 +31,7 @@ export const SignUpStep = ({
     args: [address!, merkleRoot, nullifierHash, proof],
   })
 
-  const { write } = useContractWrite(config)
+  const { write, isLoading, data } = useContractWrite(config)
 
   return (
     <WidthRestrictedCard>
@@ -46,8 +47,20 @@ export const SignUpStep = ({
           className="w-full rounded-lg"
           aria-label="World ID image"
         />
-        <Button disabled={!write} onClick={() => write!()} className="w-full">
-          Sign up
+        <Button
+          disabled={!write || isLoading}
+          onClick={() => write!()}
+          className="w-full"
+        >
+          {/* redirect will occur */}
+          {isLoading || data ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing up...
+            </>
+          ) : (
+            <>Sign up</>
+          )}{' '}
         </Button>
       </CardContent>
     </WidthRestrictedCard>
