@@ -6,10 +6,10 @@ import { useAccount } from 'wagmi'
 
 export const ConnectWalletButton = ({
   className,
-  variant = 'secondary',
+  variant = 'accent',
 }: {
   className?: string
-  variant?: 'default' | 'secondary'
+  variant?: 'default' | 'accent'
 }) => {
   const { open } = useWeb3Modal()
   const { isConnecting, isReconnecting } = useAccount()

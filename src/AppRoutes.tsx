@@ -1,4 +1,9 @@
-import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom'
+import {
+  createBrowserRouter,
+  Link,
+  Outlet,
+  RouterProvider,
+} from 'react-router-dom'
 import { MainPage } from '@/pages/Main/MainPage'
 import { GameAvailableLayout } from '@/components/GameAvailableLayout'
 
@@ -8,7 +13,11 @@ import { Button } from '@/components/ui/button'
 
 const router = createBrowserRouter([
   {
-    element: <GameAvailableLayout />,
+    element: (
+      <GameAvailableLayout>
+        <Outlet />
+      </GameAvailableLayout>
+    ),
     children: [
       {
         path: '',
@@ -19,17 +28,6 @@ const router = createBrowserRouter([
         element: <PlayPage />,
       },
     ],
-  },
-  {
-    path: 'no-active-game',
-    element: (
-      <div>
-        No active game{' '}
-        <Button asChild>
-          <Link to="/">Refresh</Link>
-        </Button>
-      </div>
-    ),
   },
   {
     path: 'admin',

@@ -5,5 +5,5 @@ export const WidthRestrictedCard = ({
 }: {
   children: React.ReactNode
 }) => {
-  return <Card className="max-w-[400px]">{children}</Card>
+  return <Card className="max-w-[400px] w-[400px]">{children}</Card>
 }

@@ -1,12 +1,31 @@
+import {
+  GameAvailableBaseLayout,
+  GameAvailableLayout,
+} from '@/components/GameAvailableLayout'
+import { NavBar } from '@/components/NavBar'
 import { WaitingForHostCard } from '@/components/WaitingForHostCard'
 import { WaitingForOthersCard } from '@/components/WaitingForOthersCard'
+import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Slider } from '@/components/ui/slider'
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { SybilGameLauncherAbi } from '@/constants/SybilGameLauncherAbi'
 import { getSecondsFromMilliSeconds } from '@/lib/getSeconds'
 import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
+import { useCurrentGameContractAddress } from '@/lib/useCurrentGameContractAddress'
+import { useCurrentRound } from '@/lib/useCurrentRound'
+import { useCurrentRoundRegisteredPlayersCount } from '@/lib/useCurrentRoundRegisteredPlayersCount'
+import { useGameState } from '@/lib/useGameState'
 import { CommitStage } from '@/pages/Play/CommitStage'
+import { GameCompleted } from '@/pages/Play/GameCompleted'
 import { RevealStage } from '@/pages/Play/RevealStage'
 import { useState } from 'react'
 import { useContractWrite, usePrepareContractWrite } from 'wagmi'
@@ -15,6 +34,7 @@ const Playground = () => {
   const [startTime] = useState(BigInt(getSecondsFromMilliSeconds(Date.now())))
   return (
     <>
+      <GameCompleted />
       {/* <RevealStage
         startTime={startTime}
         deadline={startTime + 100n}
@@ -50,7 +70,7 @@ const useLaunchGame = ({
   commitDuration: number
   revealDuration: number
 }) => {
-  const { config } = usePrepareContractWrite({
+  const { config, isLoading: isConfigLoading } = usePrepareContractWrite({
     address: import.meta.env.VITE_GAME_LAUNCHER_CONTRACT_ADDRESS,
     abi: SybilGameLauncherAbi,
     functionName: 'launchGame',
@@ -63,28 +83,188 @@ const useLaunchGame = ({
     ],
   })
 
-  return useContractWrite(config)
+  return {
+    ...useContractWrite(config),
+    isConfigLoading,
+  }
 }
 
-const LaunchGameButton = () => {
-  const { write, isLoading } = useLaunchGame({
-    numRounds: 2,
-    commitDuration: 60,
-    revealDuration: 60,
+const LaunchGameButton = ({
+  numRounds,
+  commitDuration,
+  revealDuration,
+}: {
+  numRounds: number
+  commitDuration: number
+  revealDuration: number
+}) => {
+  const { write, isLoading, isConfigLoading } = useLaunchGame({
+    numRounds,
+    commitDuration,
+    revealDuration,
   })
-  return <Button onClick={() => write?.()}>Launch game</Button>
+  return (
+    <Button
+      disabled={isConfigLoading || isLoading}
+      onClick={() => write?.()}
+      className="w-full"
+    >
+      Launch game
+    </Button>
+  )
+}
+
+const defaultDuration = 30
+const defaultNumRounds = 2
+
+const LaunchCard = () => {
+  const [selectedDuration, setSelectedDuration] = useState(defaultDuration)
+  const [selectedNumRounds, setSelectedNumRounds] = useState(defaultNumRounds)
+
+  return (
+    <WidthRestrictedCard>
+      <CardHeader>
+        <CardTitle>Launcher</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-8">
+        <div className="text-lg flex flex-col gap-2 font-semibold">
+          Commit & Reveal durations
+          <div className="text-sm font-light">{selectedDuration} seconds</div>
+          <Slider
+            defaultValue={[defaultDuration]}
+            step={1}
+            max={100}
+            min={20}
+            value={[selectedDuration]}
+            onValueChange={(value) => setSelectedDuration(value[0])}
+          />
+        </div>
+        <div className="text-lg flex flex-col gap-2 font-semibold">
+          Number of rounds
+          <div className="text-sm font-light">{selectedNumRounds} rounds</div>
+          <Slider
+            defaultValue={[defaultNumRounds]}
+            step={1}
+            max={10}
+            min={2}
+            value={[selectedNumRounds]}
+            onValueChange={(value) => setSelectedNumRounds(value[0])}
+          />
+        </div>
+      </CardContent>
+      <CardFooter>
+        <LaunchGameButton
+          numRounds={selectedNumRounds}
+          commitDuration={selectedDuration}
+          revealDuration={selectedDuration}
+        />
+      </CardFooter>
+    </WidthRestrictedCard>
+  )
 }
 
 export const AdminPage = () => {
   return (
-    <>
-      <Card className="flex flex-col gap-4">
-        <LaunchGameButton />
+    <div className="flex flex-col flex-1 ">
+      <NavBar />
+      <div className="flex-1 flex flex-col justify-center items-center gap-4">
+        <GameAvailableBaseLayout>
+          <GameStatusBoard />
+        </GameAvailableBaseLayout>
+        <LaunchCard />
+      </div>
+
+      <Playground />
+    </div>
+  )
+}
+
+const RoundState = ({
+  state,
+}: {
+  state: 0 | 1
+}) => {
+  switch (state) {
+    case 0:
+      return <div>Commit stage</div>
+    case 1:
+      return <div>Reveal stage</div>
+  }
+}
+
+const GameState = ({
+  state,
+}: {
+  state: 0 | 1 | 2
+}) => {
+  switch (state) {
+    case 0:
+      return <div>Game not started</div>
+    case 1:
+      return <div>Game in progress</div>
+    case 2:
+      return <div>Game completed</div>
+  }
+}
+
+const GameStatusBoard = () => {
+  const gameAddress = useCurrentGameContractAddressContext()
+  const {
+    currentRound,
+    currentRoundIndex,
+    isLoading: isCurrentRoundLoading,
+  } = useCurrentRound()
+
+  const { gameState, isLoading: isGameStateLoading } = useGameState()
+
+  const { roundRegisteredPlayersCount, isLoading: isPlayerCountLoading } =
+    useCurrentRoundRegisteredPlayersCount()
+
+  if (
+    isCurrentRoundLoading ||
+    !currentRound ||
+    currentRoundIndex === undefined ||
+    isGameStateLoading ||
+    gameState === undefined ||
+    isPlayerCountLoading ||
+    roundRegisteredPlayersCount === undefined
+  ) {
+    console.log(
+      isCurrentRoundLoading,
+      currentRound,
+      currentRoundIndex,
+      isGameStateLoading,
+      gameState,
+      roundRegisteredPlayersCount,
+      isPlayerCountLoading,
+    )
+    return <div>Loading...</div>
+  }
+
+  return (
+    <WidthRestrictedCard>
+      <CardHeader>
+        <CardTitle>Game Status</CardTitle>
+        <CardDescription>game address: {gameAddress}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          Game state: <GameState state={gameState as any} />
+        </div>
+        <div>Current round: {Number(currentRoundIndex)}</div>
+        <div className="flex items-center gap-2">
+          Current round state: <RoundState state={currentRound.state as any} />
+        </div>
+        <div>Current round question: {currentRound.question.toString()}</div>
+        <div>Current answer: {currentRound.answer.toString()}</div>
+        <div>Current round deadline: {currentRound.deadline.toString()}</div>
+        <div># Remaining players: {roundRegisteredPlayersCount.toString()}</div>
+      </CardContent>
+      <CardFooter className="flex gap-2">
         <SubmitQuestionButton />
         <RevealAnswerButton />
-      </Card>
-      <Playground />
-    </>
+      </CardFooter>
+    </WidthRestrictedCard>
   )
 }
 

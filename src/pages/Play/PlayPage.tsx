@@ -1,26 +1,9 @@
-import { SybilGameAbi } from '@/constants/SybilGameAbi'
-import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
+import { useGameState } from '@/lib/useGameState'
 import { useIsPlayerRegisteredForCurrentRound } from '@/lib/useIsPlayerRegisteredForCurrentRound'
 import { GameCompleted } from '@/pages/Play/GameCompleted'
 import { GameInProgress } from '@/pages/Play/GameInProgress'
 import { GameNotStarted } from '@/pages/Play/GameNotStarted'
 import { Navigate } from 'react-router-dom'
-import { useContractRead } from 'wagmi'
-
-const useGameState = () => {
-  const gameAddress = useCurrentGameContractAddressContext()
-
-  const { data: gameState, isLoading } = useContractRead({
-    address: gameAddress,
-    abi: SybilGameAbi,
-    functionName: 'gameState',
-  })
-
-  return {
-    gameState,
-    isLoading,
-  }
-}
 
 export const PlayPage = () => {
   const { isRegistered, isLoading: isPlayerRegisteredLoading } =

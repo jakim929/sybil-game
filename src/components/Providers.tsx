@@ -21,8 +21,7 @@ const { chains, publicClient } = configureChains(
   [
     jsonRpcProvider({
       rpc: () => ({
-        http: 'http://127.0.0.1:8545',
-        // http: import.meta.env.VITE_JSON_RPC_URL,
+        http: import.meta.env.VITE_JSON_RPC_URL,
       }),
     }),
     publicProvider(),

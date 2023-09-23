@@ -14,7 +14,7 @@ const OptionButton = ({
   return (
     <Button
       disabled={isDisabled}
-      variant={isSelected ? 'secondary' : 'outline'}
+      variant={isSelected ? 'accent' : 'outline'}
       onClick={() => onClick()}
     >
       {option}
