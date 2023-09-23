@@ -1,7 +1,9 @@
 const WhitenedOutImage = ({
   imageSrc,
+  opacity = 0.5,
 }: {
   imageSrc: string
+  opacity?: number
 }) => {
   return (
     <>
@@ -29,7 +31,7 @@ const WhitenedOutImage = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(255,255,255,0.8)',
+          backgroundColor: `rgba(255,255,255,${opacity})`,
           zIndex: 0,
         }}
       />
@@ -40,10 +42,11 @@ const WhitenedOutImage = ({
 export const CenteredCardLayout = ({
   imageSrc,
   children,
-}: { imageSrc?: string; children: React.ReactNode }) => {
+  opacity,
+}: { imageSrc?: string; children: React.ReactNode; opacity?: number }) => {
   return (
     <div className="flex-1 flex flex-col relative">
-      {imageSrc && <WhitenedOutImage imageSrc={imageSrc} />}
+      {imageSrc && <WhitenedOutImage imageSrc={imageSrc} opacity={opacity} />}
       <div className="flex-1 flex flex-col justify-center items-center relative">
         {children}
       </div>

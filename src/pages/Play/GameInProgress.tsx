@@ -8,6 +8,7 @@ import { useIsPlayerRegisteredForCurrentRound } from '@/lib/useIsPlayerRegistere
 import { CommitStage } from '@/pages/Play/CommitStage'
 import { RevealStage } from '@/pages/Play/RevealStage'
 import { Navigate } from 'react-router-dom'
+import WorldIdBackground from '@/assets/worldid-background.jpg'
 
 const GameInProgressContent = () => {
   const {
@@ -121,7 +122,7 @@ const GameInProgressContent = () => {
 
 export const GameInProgress = () => {
   return (
-    <CenteredCardLayout>
+    <CenteredCardLayout imageSrc={WorldIdBackground} opacity={0.85}>
       <GameInProgressContent />
     </CenteredCardLayout>
   )
