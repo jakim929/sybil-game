@@ -21,8 +21,8 @@ contract SybilGame is Owned {
     enum RoundState { Commit, Reveal }
 
 
-    uint256 constant public COMMIT_DURATION = 30 seconds;
-    uint256 constant public REVEAL_DURATION = 30 seconds;
+    uint256 immutable public commitDuration;
+    uint256 immutable public revealDuration;
 
 
     event PlayerRegisteredForRound(uint256 round, address indexed playerAddress);
@@ -64,7 +64,9 @@ contract SybilGame is Owned {
         IWorldID _worldId,
         string memory _appId,
         string memory _actionId,
-        uint256 _numRounds
+        uint256 _numRounds,
+        uint256 _commitDuration,
+        uint256 _revealDuration
     ) Owned(_owner) {
         worldId = _worldId;
         appId = _appId;
@@ -73,6 +75,8 @@ contract SybilGame is Owned {
             .encodePacked(abi.encodePacked(_appId).hashToField(), _actionId)
             .hashToField();
         numRounds = _numRounds;
+        commitDuration = _commitDuration;
+        revealDuration = _revealDuration;
     }
 
     function signUp(
@@ -116,7 +120,7 @@ contract SybilGame is Owned {
         require(block.timestamp > rounds[currentRoundIndex].deadline, "SybilGame: Commit stage is still active");
 
         rounds[currentRoundIndex].state = RoundState.Reveal;
-        rounds[currentRoundIndex].deadline = block.timestamp + REVEAL_DURATION;  // Set deadline for reveal
+        rounds[currentRoundIndex].deadline = block.timestamp + revealDuration;  // Set deadline for reveal
         rounds[currentRoundIndex].answer = answer;
     }
 
@@ -156,7 +160,7 @@ contract SybilGame is Owned {
 
     function _setupNewRound(string memory question) internal {
         rounds[currentRoundIndex].state = RoundState.Commit;
-        rounds[currentRoundIndex].deadline = block.timestamp + COMMIT_DURATION;  // Set deadline for commit
+        rounds[currentRoundIndex].deadline = block.timestamp + commitDuration;  // Set deadline for commit
         rounds[currentRoundIndex].question = question;
     }
 

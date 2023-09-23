@@ -1,6 +1,5 @@
 import { CenteredCardLayout } from '@/components/CenteredCardLayout'
 import { EliminatedCard } from '@/components/EliminatedCard'
-import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
 import { useConstantGameParams } from '@/lib/useConstantGameParams'
 import { useCurrentRound } from '@/lib/useCurrentRound'
 import { useCurrentRoundCommitment } from '@/lib/useCurrentRoundCommitment'
@@ -25,11 +24,8 @@ const GameInProgressContent = () => {
   const { isRegistered, isLoading: isPlayerRegisteredLoading } =
     useIsPlayerRegisteredForCurrentRound()
 
-  const {
-    commitment,
-    submissionPayload,
-    isLoading: isGetCurrentRoundCommitmentLoading,
-  } = useCurrentRoundCommitment()
+  const { submissionPayload, isLoading: isGetCurrentRoundCommitmentLoading } =
+    useCurrentRoundCommitment()
 
   if (
     isCurrentRoundLoading ||
@@ -67,6 +63,7 @@ const GameInProgressContent = () => {
 
   const { state, question, deadline, answer } = currentRound
 
+  // Commit stage
   if (state === 0) {
     return (
       <CommitStage
@@ -77,11 +74,14 @@ const GameInProgressContent = () => {
     )
   }
 
+  // Reveal stage
   if (state === 1) {
     if (isGetCurrentRoundCommitmentLoading) {
       // add better loading
       return null
     }
+
+    // Didn't submit in time
     if (!submissionPayload) {
       return (
         <EliminatedCard
@@ -91,6 +91,7 @@ const GameInProgressContent = () => {
       )
     }
 
+    // Wrong answer
     if (submissionPayload.answer !== answer) {
       return (
         <EliminatedCard
@@ -99,6 +100,7 @@ const GameInProgressContent = () => {
         />
       )
     }
+
     return (
       <RevealStage
         deadline={deadline}

@@ -18,6 +18,7 @@ import {
 } from 'wagmi'
 import { WaitingForHostCard } from '@/components/WaitingForHostCard'
 import { WaitingForOthersCard } from '@/components/WaitingForOthersCard'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 
 const useRevealAnswer = ({
   submissionPayload,
@@ -26,8 +27,10 @@ const useRevealAnswer = ({
   submissionPayload: SubmissionPayload
   onSubmit: (payload: SubmissionPayload) => void
 }) => {
+  const gameAddress = useCurrentGameContractAddressContext()
+
   const { config } = usePrepareContractWrite({
-    address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+    address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'revealAnswer',
     args: [submissionPayload!.answer, submissionPayload!.nonce],

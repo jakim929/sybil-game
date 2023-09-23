@@ -14,7 +14,7 @@
     "lint:check": "biome check . --verbose",
     "preinstall": "npx only-allow pnpm",
     "anvil": "source .env && anvil --fork-url $VITE_JSON_RPC_URL --block-time 2",
-    "deploy:anvil": "source .env && forge create contracts/src/SybilGame.sol:SybilGame --rpc-url http://127.0.0.1:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --constructor-args-path deploy-args-op-goerli "
+    "deploy:anvil": "source .env && forge create contracts/src/SybilGameLauncher.sol:SybilGameLauncher --rpc-url http://127.0.0.1:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --constructor-args $VITE_OWNER_ADDRESS $VITE_WORLDID_ROUTER_ADDRESS"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",

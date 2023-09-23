@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 import { useCurrentRoundCommitment } from '@/lib/useCurrentRoundCommitment'
 import { useNonce } from '@/lib/useNonce'
 import { useRemainingSeconds } from '@/lib/useRemainingSeconds'
@@ -25,6 +26,8 @@ const useSubmitAnswer = ({
   answer?: string
 }) => {
   const { setSubmissionPayload } = useSubmissionPayloadState()
+  const gameAddress = useCurrentGameContractAddressContext()
+
   const { nonce } = useNonce()
 
   const commitment = answer
@@ -37,7 +40,7 @@ const useSubmitAnswer = ({
     : undefined
 
   const { config, isLoading: isConfigLoading } = usePrepareContractWrite({
-    address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+    address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'commitAnswer',
     args: [commitment!],

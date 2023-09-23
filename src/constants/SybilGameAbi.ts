@@ -26,6 +26,16 @@ export const SybilGameAbi = [
         name: '_numRounds',
         type: 'uint256',
       },
+      {
+        internalType: 'uint256',
+        name: '_commitDuration',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: '_revealDuration',
+        type: 'uint256',
+      },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -70,32 +80,6 @@ export const SybilGameAbi = [
   },
   {
     inputs: [],
-    name: 'COMMIT_DURATION',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'REVEAL_DURATION',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'actionId',
     outputs: [
       {
@@ -131,6 +115,19 @@ export const SybilGameAbi = [
     name: 'commitAnswer',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'commitDuration',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -249,6 +246,19 @@ export const SybilGameAbi = [
     name: 'revealAnswer',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'revealDuration',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {

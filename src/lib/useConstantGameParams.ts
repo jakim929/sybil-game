@@ -1,22 +1,25 @@
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
+import { useCurrentGameContractAddress } from '@/lib/useCurrentGameContractAddress'
 import { useContractReads } from 'wagmi'
 
 export const useConstantGameParams = () => {
+  const { gameAddress } = useCurrentGameContractAddress()
   const { data, isLoading } = useContractReads({
     contracts: [
       {
-        address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+        address: gameAddress,
         abi: SybilGameAbi,
-        functionName: 'COMMIT_DURATION',
+        functionName: 'commitDuration',
       },
       {
-        address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+        address: gameAddress,
         abi: SybilGameAbi,
-        functionName: 'REVEAL_DURATION',
+        functionName: 'revealDuration',
       },
     ],
     staleTime: Infinity,
     allowFailure: false,
+    enabled: !!gameAddress,
   })
 
   return {

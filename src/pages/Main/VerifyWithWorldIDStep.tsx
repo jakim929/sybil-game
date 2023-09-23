@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 import WorldcoinLogo from '@/assets/worldcoin-logo.svg?react'
 import WorldIDAppImage from '@/assets/worldid-app.jpg'
-import { Address, decodeAbiParameters } from 'viem'
+import { Address } from 'viem'
 
 import {
   CardContent,

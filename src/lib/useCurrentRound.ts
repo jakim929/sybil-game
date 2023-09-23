@@ -1,16 +1,19 @@
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 import { useContractReads } from 'wagmi'
 
 export const useCurrentRound = () => {
+  const gameAddress = useCurrentGameContractAddressContext()
+
   const { data, ...rest } = useContractReads({
     contracts: [
       {
-        address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+        address: gameAddress,
         abi: SybilGameAbi,
         functionName: 'currentRound',
       },
       {
-        address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+        address: gameAddress,
         abi: SybilGameAbi,
         functionName: 'currentRoundIndex',
       },

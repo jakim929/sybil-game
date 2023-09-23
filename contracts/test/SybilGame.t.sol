@@ -27,7 +27,7 @@ contract SybilGameTest is Test {
         bob = makeAddr("bob");
         sally = makeAddr("sally");
         worldId = IWorldID(0xf8BFFC733Ba2abd4b17f01e18cBdDF560d830864);
-        sybilGame = new SybilGame(owner, worldId, appId, actionId, 2);
+        sybilGame = new SybilGame(owner, worldId, appId, actionId, 2, 1 minutes, 1 minutes);
     }
 
     function _signUpUser(address user) internal {

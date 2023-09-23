@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
 import { Loader2 } from 'lucide-react'
 import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 
 export const SignUpStep = ({
   address,
@@ -25,12 +26,14 @@ export const SignUpStep = ({
   reset: () => void
 }) => {
   const { merkleRoot, nullifierHash, proof } = verificationResponse
+  const gameAddress = useCurrentGameContractAddressContext()
+
   const {
     config,
     error,
     isLoading: isConfigLoading,
   } = usePrepareContractWrite({
-    address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+    address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'signUp',
     args: [address!, merkleRoot, nullifierHash, proof],

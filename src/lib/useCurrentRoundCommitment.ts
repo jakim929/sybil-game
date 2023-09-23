@@ -1,20 +1,23 @@
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { useSubmissionPayloadState } from '@/lib/SubmissionPayloadState'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 import { toHex } from 'viem'
 import { useAccount, useContractRead } from 'wagmi'
 
 export const useCurrentRoundCommitment = () => {
+  const gameAddress = useCurrentGameContractAddressContext()
+
   const { address } = useAccount()
   const { data: currentRoundIndex, isLoading: isCurrentRoundIndexLoading } =
     useContractRead({
-      address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+      address: gameAddress,
       abi: SybilGameAbi,
       functionName: 'currentRoundIndex',
     })
 
   const { data: commitment, isLoading: isRoundRegisteredPlayersLoading } =
     useContractRead({
-      address: import.meta.env.VITE_GAME_CONTRACT_ADDRESS,
+      address: gameAddress,
       abi: SybilGameAbi,
       functionName: 'roundPlayerCommitments',
       args: [currentRoundIndex!, address!],
