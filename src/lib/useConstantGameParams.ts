@@ -1,9 +1,9 @@
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
-import { useCurrentGameContractAddress } from '@/lib/useCurrentGameContractAddress'
+import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 import { useContractReads } from 'wagmi'
 
 export const useConstantGameParams = () => {
-  const { gameAddress } = useCurrentGameContractAddress()
+  const gameAddress = useCurrentGameContractAddressContext()
   const { data, isLoading } = useContractReads({
     contracts: [
       {

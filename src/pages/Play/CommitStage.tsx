@@ -107,10 +107,12 @@ export const CommitStage = ({
   startTime,
   deadline,
   question,
+  options,
 }: {
   startTime: bigint
   deadline: bigint
   question: string
+  options: string[]
 }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>()
   console.log('commitStage')
@@ -161,12 +163,7 @@ export const CommitStage = ({
 
       <CardContent className="flex flex-col gap-8">
         <OptionButtons
-          options={[
-            'Do Kwon',
-            'Vitalik Buterin',
-            'Brian Armstrong',
-            'Satoshi Nakamoto',
-          ]}
+          options={options}
           onSelect={setSelectedAnswer}
           selectedOption={selectedAnswer}
           isDisabled={shouldDisableSelect}

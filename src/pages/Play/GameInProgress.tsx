@@ -1,5 +1,6 @@
 import { CenteredCardLayout } from '@/components/CenteredCardLayout'
 import { EliminatedCard } from '@/components/EliminatedCard'
+import { questionsByRound } from '@/lib/questionsByRound'
 import { useConstantGameParams } from '@/lib/useConstantGameParams'
 import { useCurrentRound } from '@/lib/useCurrentRound'
 import { useCurrentRoundCommitment } from '@/lib/useCurrentRoundCommitment'
@@ -63,6 +64,8 @@ const GameInProgressContent = () => {
 
   const { state, question, deadline, answer } = currentRound
 
+  const options = questionsByRound[Number(currentRoundIndex)].options
+
   // Commit stage
   if (state === 0) {
     return (
@@ -70,6 +73,7 @@ const GameInProgressContent = () => {
         deadline={deadline}
         question={question}
         startTime={deadline - commitDuration}
+        options={options}
       />
     )
   }

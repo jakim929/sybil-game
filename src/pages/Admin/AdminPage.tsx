@@ -19,6 +19,7 @@ import { Slider } from '@/components/ui/slider'
 import { SybilGameAbi } from '@/constants/SybilGameAbi'
 import { SybilGameLauncherAbi } from '@/constants/SybilGameLauncherAbi'
 import { getSecondsFromMilliSeconds } from '@/lib/getSeconds'
+import { questionsByRound } from '@/lib/questionsByRound'
 import { useCurrentGameContractAddressContext } from '@/lib/useCurrentGameContext'
 import { useCurrentGameContractAddress } from '@/lib/useCurrentGameContractAddress'
 import { useCurrentRound } from '@/lib/useCurrentRound'
@@ -270,9 +271,13 @@ const GameStatusBoard = () => {
 
 const SubmitQuestionButton = () => {
   const gameAddress = useCurrentGameContractAddressContext()
+  const { currentRound, currentRoundIndex, isLoading } = useCurrentRound()
 
-  const question =
-    'Which titan of industry tweeted on 5/9/22: “Deploying more capital - steady lads”?'
+  if (isLoading || currentRoundIndex === undefined || !currentRound) {
+    return <div>'Loading...'</div>
+  }
+
+  const question = questionsByRound[Number(currentRoundIndex)].question
   const { write } = useContractWrite({
     address: gameAddress,
     abi: SybilGameAbi,
@@ -285,7 +290,13 @@ const SubmitQuestionButton = () => {
 const RevealAnswerButton = () => {
   const gameAddress = useCurrentGameContractAddressContext()
 
-  const answer = 'Do Kwon'
+  const { currentRound, currentRoundIndex, isLoading } = useCurrentRound()
+
+  if (isLoading || currentRoundIndex === undefined || !currentRound) {
+    return <div>'Loading...'</div>
+  }
+
+  const answer = questionsByRound[Number(currentRoundIndex)].answer
   const { write } = useContractWrite({
     address: gameAddress,
     abi: SybilGameAbi,
