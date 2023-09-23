@@ -1,5 +1,6 @@
 import SybilGameLogo from '@/assets/sybil-game-logo.jpg'
 import { ConnectWalletButton } from '@/components/ConnectWalletButton'
+import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 import { useAccount } from 'wagmi'
 
@@ -27,10 +28,20 @@ const AccountStatus = () => {
 }
 
 export const NavBar = () => {
+  const { address } = useAccount()
+
   return (
     <nav className="h-[72px] flex items-center justify-between border-b-[1px] p-4">
       <LogoBanner />
-      <AccountStatus />
+      <div className="flex items-center gap-4">
+        {address && address === import.meta.env.VITE_OWNER_ADDRESS && (
+          <Button asChild>
+            <Link to="/admin">Admin</Link>
+          </Button>
+        )}
+
+        <AccountStatus />
+      </div>
     </nav>
   )
 }

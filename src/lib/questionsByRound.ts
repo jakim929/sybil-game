@@ -9,7 +9,7 @@ export const questionsByRound: Record<
     answer: string
   }
 > = {
-  1: {
+  0: {
     question:
       'Which titan of industry tweeted on 5/9/22: “Deploying more capital - steady lads”?',
     options: [
@@ -20,19 +20,19 @@ export const questionsByRound: Record<
     ],
     answer: 'Do Kwon',
   },
-  2: {
+  1: {
     question:
       'Consider a Merkle tree with 1,024 leaves that uses SHA256. How long is the proof size for one inclusion, in bits?',
     options: ['1024', '10', '2560', '262144'],
     answer: '2560',
   },
 
-  3: {
+  2: {
     question: 'What is the best color?',
     options: ['blue', 'green', 'yellow', 'brown'],
     answer: 'blue',
   },
-  4: {
+  3: {
     question:
       'Which titan of industry tweeted on 5/9/22: “Deploying more capital - steady lads”?',
     options: [
@@ -43,7 +43,7 @@ export const questionsByRound: Record<
     ],
     answer: 'Do Kwon',
   },
-  5: {
+  4: {
     question:
       'Consider a Merkle tree with 1,024 leaves that uses SHA256. How long is the proof size for one inclusion, in bits?',
     options: ['1024', '10', '2560', '262144'],
