@@ -1,6 +1,6 @@
 # Sybil Game
 
-Onchain live trivia
+Onchain live trivia. Uses WorldID for sybil resistance.
 
 
 # Developing
