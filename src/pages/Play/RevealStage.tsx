@@ -104,7 +104,6 @@ export const RevealStage = ({
   answer: string
   submissionPayload: SubmissionPayload
 }) => {
-  console.log('reveal stage')
   const remainingSeconds = useRemainingSeconds(Number(deadline))
 
   const {

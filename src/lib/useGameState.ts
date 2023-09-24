@@ -9,6 +9,8 @@ export const useGameState = () => {
     address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'gameState',
+    enabled: !!gameAddress,
+    watch: true,
   })
 
   return {

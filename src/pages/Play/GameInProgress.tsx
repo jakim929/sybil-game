@@ -29,6 +29,8 @@ const GameInProgressContent = () => {
   const { submissionPayload, isLoading: isGetCurrentRoundCommitmentLoading } =
     useCurrentRoundCommitment()
 
+  console.log('inprogress', currentRound, currentRoundIndex)
+
   if (
     isCurrentRoundLoading ||
     isConstantGameParamsLoading ||

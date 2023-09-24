@@ -20,6 +20,7 @@ export const useConstantGameParams = () => {
     staleTime: Infinity,
     allowFailure: false,
     enabled: !!gameAddress,
+    watch: true,
   })
 
   return {

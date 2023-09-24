@@ -19,6 +19,8 @@ export const useCurrentRound = () => {
       },
     ],
     allowFailure: false,
+    enabled: !!gameAddress,
+    watch: true,
   })
   return {
     currentRound: data?.[0],

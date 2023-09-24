@@ -13,6 +13,7 @@ export const useCurrentRoundCommitment = () => {
       address: gameAddress,
       abi: SybilGameAbi,
       functionName: 'currentRoundIndex',
+      watch: true,
     })
 
   const { data: commitment, isLoading: isRoundRegisteredPlayersLoading } =
@@ -21,7 +22,12 @@ export const useCurrentRoundCommitment = () => {
       abi: SybilGameAbi,
       functionName: 'roundPlayerCommitments',
       args: [currentRoundIndex!, address!],
-      enabled: !!address && currentRoundIndex !== undefined,
+      enabled:
+        !!address &&
+        currentRoundIndex !== undefined &&
+        currentRoundIndex !== null &&
+        !!gameAddress,
+      watch: true,
     })
 
   const { submissionPayloadByCommitment } = useSubmissionPayloadState()

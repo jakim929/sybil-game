@@ -11,6 +11,7 @@ export const useIsPlayerRegisteredForCurrentRound = () => {
       address: gameAddress,
       abi: SybilGameAbi,
       functionName: 'currentRoundIndex',
+      watch: true,
     })
 
   const { data: isRegistered, isLoading: isRoundRegisteredPlayersLoading } =
@@ -19,7 +20,12 @@ export const useIsPlayerRegisteredForCurrentRound = () => {
       abi: SybilGameAbi,
       functionName: 'roundRegisteredPlayers',
       args: [currentRoundIndex!, address!],
-      enabled: !!address && currentRoundIndex !== undefined,
+      enabled:
+        !!address &&
+        currentRoundIndex !== undefined &&
+        currentRoundIndex !== null &&
+        !!gameAddress,
+      watch: true,
     })
 
   const isLoading =

@@ -25,6 +25,7 @@ import { useCurrentGameContractAddress } from '@/lib/useCurrentGameContractAddre
 import { useCurrentRound } from '@/lib/useCurrentRound'
 import { useCurrentRoundRegisteredPlayersCount } from '@/lib/useCurrentRoundRegisteredPlayersCount'
 import { useGameState } from '@/lib/useGameState'
+import { useRemainingSeconds } from '@/lib/useRemainingSeconds'
 import { CommitStage } from '@/pages/Play/CommitStage'
 import { GameCompleted } from '@/pages/Play/GameCompleted'
 import { RevealStage } from '@/pages/Play/RevealStage'
@@ -274,6 +275,11 @@ const SubmitQuestionButton = () => {
   const { currentRound, currentRoundIndex, isLoading } = useCurrentRound()
   const { gameState, isLoading: isGameStateLoading } = useGameState()
 
+  const remainingSeconds = useRemainingSeconds(
+    currentRound?.deadline !== undefined
+      ? Number(currentRound?.deadline)
+      : undefined,
+  )
   if (
     isLoading ||
     currentRoundIndex === undefined ||
@@ -284,35 +290,77 @@ const SubmitQuestionButton = () => {
     return <div>'Loading...'</div>
   }
 
+  const enabled =
+    (remainingSeconds <= 0 && currentRound.state === 1) || gameState === 0
+
   const question =
     gameState === 0
       ? questionsByRound[Number(currentRoundIndex)].question
       : questionsByRound[Number(currentRoundIndex) + 1].question
 
-  const { write } = useContractWrite({
+  const { write, isLoading: isWriteLoading } = useContractWrite({
     address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'progressToNextRound',
     args: [question],
   })
-  return <Button onClick={() => write?.()}>Submit question</Button>
+  return (
+    <Button
+      disabled={!enabled || !write || isLoading}
+      onClick={() => write?.()}
+    >
+      Submit question
+    </Button>
+  )
 }
 
 const RevealAnswerButton = () => {
   const gameAddress = useCurrentGameContractAddressContext()
 
-  const { currentRound, currentRoundIndex, isLoading } = useCurrentRound()
+  const {
+    currentRound,
+    currentRoundIndex,
+    isLoading: isCurrentRoundLoading,
+  } = useCurrentRound()
 
-  if (isLoading || currentRoundIndex === undefined || !currentRound) {
+  const remainingSeconds = useRemainingSeconds(
+    currentRound?.deadline !== undefined
+      ? Number(currentRound?.deadline)
+      : undefined,
+  )
+
+  console.log(
+    'reveal',
+    currentRound,
+    currentRoundIndex,
+    isCurrentRoundLoading,
+    remainingSeconds,
+    gameAddress,
+  )
+
+  if (
+    isCurrentRoundLoading ||
+    currentRoundIndex === undefined ||
+    !currentRound
+  ) {
     return <div>'Loading...'</div>
   }
 
+  const enabled = remainingSeconds <= 0 && currentRound.state === 0
+
   const answer = questionsByRound[Number(currentRoundIndex)].answer
-  const { write } = useContractWrite({
+  const { write, isLoading } = useContractWrite({
     address: gameAddress,
     abi: SybilGameAbi,
     functionName: 'progressRoundToRevealStage',
     args: [answer],
   })
-  return <Button onClick={() => write?.()}>Reveal answer</Button>
+  return (
+    <Button
+      disabled={!enabled || !write || isLoading}
+      onClick={() => write?.()}
+    >
+      Reveal answer
+    </Button>
+  )
 }

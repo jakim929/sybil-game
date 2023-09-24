@@ -115,7 +115,6 @@ export const CommitStage = ({
   options: string[]
 }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>()
-  console.log('commitStage')
 
   const {
     isLoading: isSubmissionLoading,

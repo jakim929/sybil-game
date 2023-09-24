@@ -35,22 +35,12 @@ export const GameAvailableLayout = ({
 }: {
   children: React.ReactNode
 }) => {
-  const { gameAddress, isLoading } = useCurrentGameContractAddress()
-
-  if (isLoading) {
-    return <div>loading...</div>
-  }
-
-  if (!gameAddress) {
-    return <div>no game found</div>
-  }
-
   return (
-    <GameContractAddressContext.Provider value={gameAddress}>
+    <GameAvailableBaseLayout>
       <div className="flex flex-col flex-1">
         <NavBar />
         <div className="flex-1 flex flex-col">{children}</div>
       </div>
-    </GameContractAddressContext.Provider>
+    </GameAvailableBaseLayout>
   )
 }

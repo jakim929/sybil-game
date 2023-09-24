@@ -5,7 +5,7 @@ const calculateRemainingSeconds = (deadline: number) => {
   return Math.max(deadline - getSecondsFromMilliSeconds(Date.now()), 0)
 }
 
-export const useRemainingSeconds = (deadline: number) => {
+export const useRemainingSeconds = (deadline: number | undefined = 0) => {
   const [remainingSeconds, setRemainingSeconds] = useState(
     calculateRemainingSeconds(deadline),
   )

@@ -7,6 +7,7 @@ export const useCurrentGameContractAddress = () => {
     address: import.meta.env.VITE_GAME_LAUNCHER_CONTRACT_ADDRESS,
     abi: SybilGameLauncherAbi,
     functionName: 'currentGame',
+    watch: true,
   })
 
   const gameAddress = data === zeroAddress ? null : data

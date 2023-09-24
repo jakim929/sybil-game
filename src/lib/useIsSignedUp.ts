@@ -11,7 +11,8 @@ export const useIsSignedUp = () => {
     abi: SybilGameAbi,
     functionName: 'roundRegisteredPlayers',
     args: [0n, address!],
-    enabled: !!address,
+    enabled: !!address && !!gameAddress,
+    watch: true,
   })
 
   if (!address) {
