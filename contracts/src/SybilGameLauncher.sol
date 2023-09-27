@@ -17,7 +17,7 @@ contract SybilGameLauncher is Owned{
     worldId = _worldId;
   }
 
-  function launchGame(string memory _appId, string memory _actionId, uint256 _numRounds, uint256 _commitDuration, uint256 _revealDuration) public onlyOwner {
+  function launchGame(string memory _appId, string memory _actionId, uint32 _numRounds, uint256 _commitDuration, uint256 _revealDuration) public onlyOwner {
     currentGame = new SybilGame(msg.sender, worldId, _appId, _actionId, _numRounds, _commitDuration, _revealDuration);
   }
 }

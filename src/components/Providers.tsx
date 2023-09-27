@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiConfig } from 'wagmi'
 import { configureChains, createConfig, Chain } from 'wagmi'
-import { optimism, optimismGoerli } from 'wagmi/chains'
+import { foundry, optimism, optimismGoerli } from 'wagmi/chains'
 import { publicProvider } from 'wagmi/providers/public'
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
@@ -12,6 +12,7 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 const chainById: Record<number, Chain> = {
   [optimism.id]: optimism,
   [optimismGoerli.id]: optimismGoerli,
+  [foundry.id]: foundry,
 }
 
 const chain = chainById[parseInt(import.meta.env.VITE_CHAIN_ID)]

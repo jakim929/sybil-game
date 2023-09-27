@@ -15,7 +15,8 @@
     "preinstall": "npx only-allow pnpm",
     "anvil": "source .env && anvil --fork-url $FORK_CHAIN_JSON_RPC_URL --block-time 2",
     "deploy:prod": "source .env && forge create contracts/src/SybilGameLauncher.sol:SybilGameLauncher --rpc-url $VITE_JSON_RPC_URL --private-key $DEPLOYER_PRIVATE_KEY --constructor-args $VITE_OWNER_ADDRESS $VITE_WORLDID_ROUTER_ADDRESS",
-    "deploy:anvil": "source .env && forge create contracts/src/SybilGameLauncher.sol:SybilGameLauncher --rpc-url $VITE_JSON_RPC_URL --private-key $DEPLOYER_PRIVATE_KEY --constructor-args $VITE_OWNER_ADDRESS $VITE_WORLDID_ROUTER_ADDRESS"
+    "deploy:anvil": "source .env && forge create contracts/src/SybilGameLauncher.sol:SybilGameLauncher --rpc-url $VITE_JSON_RPC_URL --private-key $DEPLOYER_PRIVATE_KEY --constructor-args $VITE_OWNER_ADDRESS $VITE_WORLDID_ROUTER_ADDRESS",
+    "deploy:anvil:game": "source .env && forge create contracts/src/SybilGame.sol:SybilGame --rpc-url $VITE_JSON_RPC_URL --private-key $DEPLOYER_PRIVATE_KEY --constructor-args $VITE_OWNER_ADDRESS $VITE_WORLDID_ROUTER_ADDRESS $VITE_WORLDID_APP_ID $VITE_WORLDID_ACTION_ID 2 40 40"
   },
   "dependencies": {
     "@radix-ui/react-slider": "^1.1.2",
@@ -41,6 +42,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.0",
+    "@latticexyz/cli": "2.0.0-next.9",
+    "@latticexyz/schema-type": "2.0.0-next.9",
+    "@latticexyz/store": "2.0.0-next.9",
+    "@latticexyz/world": "2.0.0-next.9",
     "@types/node": "^20.5.9",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
