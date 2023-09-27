@@ -329,15 +329,6 @@ const RevealAnswerButton = () => {
       : undefined,
   )
 
-  console.log(
-    'reveal',
-    currentRound,
-    currentRoundIndex,
-    isCurrentRoundLoading,
-    remainingSeconds,
-    gameAddress,
-  )
-
   if (
     isCurrentRoundLoading ||
     currentRoundIndex === undefined ||

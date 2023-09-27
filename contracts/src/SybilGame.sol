@@ -91,8 +91,6 @@ contract SybilGame is Owned {
         _verifyPlayerUniqueness(playerAddress, root, nullifierHash, proof);
 
         _registerPlayerForRound(playerAddress, 0);
-
-
     }
 
     function progressToNextRound(string memory question) external onlyOwner {
@@ -116,6 +114,7 @@ contract SybilGame is Owned {
     }
     
     function progressRoundToRevealStage(string memory answer) external onlyOwner {
+        require(gameState == GameState.InProgress, "SybilGame: Game needs to be in progress");
         require(rounds[currentRoundIndex].state == RoundState.Commit, "SybilGame: Needs to be in commit stage to progress");
         require(block.timestamp > rounds[currentRoundIndex].deadline, "SybilGame: Commit stage is still active");
 

@@ -2,8 +2,6 @@ import { WidthRestrictedCard } from '@/components/WidthRestrictedCard'
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { XCircle } from 'lucide-react'
 
-// you didn't submit in time
-
 export const EliminatedCard = ({
   title,
   description,
