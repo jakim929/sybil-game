@@ -3,57 +3,62 @@ pragma solidity ^0.8.13;
 
 import { ByteHasher } from "./helpers/ByteHasher.sol";
 import { IWorldID } from "./interfaces/IWorldID.sol";
+import { StoreRead } from "@latticexyz/store/src/StoreRead.sol";
+import { StoreCore } from "@latticexyz/store/src/StoreCore.sol";
+import { Players, PlayersCount, RoundIndex, GameState, Rounds, CommitDuration, RevealDuration, RoundCount, Commitments } from "./codegen/index.sol";
+import { GameStateType, RoundStateType } from  "./codegen/common.sol";
 
 import { Owned } from "solmate/auth/Owned.sol";
 
-contract SybilGame is Owned {
+contract SybilGame is Owned, StoreRead {
     using ByteHasher for bytes;
     
 
-    struct Round {
-        RoundState state;
-        uint256 deadline;
-        string question;
-        string answer;
-    }
+    // struct Round {
+    //     RoundState state;
+    //     uint256 deadline;
+    //     string question;
+    //     string answer;
+    // }
     
-    enum GameState { NotStarted, InProgress, Completed }
-    enum RoundState { Commit, Reveal }
+    // enum GameState { NotStarted, InProgress, Completed }
+    // enum RoundState { Commit, Reveal }
 
 
-    uint256 immutable public commitDuration;
-    uint256 immutable public revealDuration;
+    // uint256 immutable public commitDuration;
+    // uint256 immutable public revealDuration;
 
 
-    event PlayerRegisteredForRound(uint256 round, address indexed playerAddress);
+    // event PlayerRegisteredForRound(uint256 round, address indexed playerAddress);
 
-    /// @dev The World ID instance that will be used for verifying proofs
+    // /// @dev The World ID instance that will be used for verifying proofs
     IWorldID internal immutable worldId;
 
-    /// @dev The contract's external nullifier hash
+    // /// @dev The contract's external nullifier hash
     uint256 internal immutable externalNullifier;
 
-    /// @dev The World ID group ID (always 1)
+    // /// @dev The World ID group ID (always 1)
     uint256 internal immutable groupId = 1;
 
-    /// @dev Whether a nullifier hash has been used already. Used to guarantee an action is only performed once by a single person
+    // /// @dev Whether a nullifier hash has been used already. Used to guarantee an action is only performed once by a single person
     mapping(uint256 => bool) internal nullifierHashes;
 
-    uint256 immutable numRounds;
+    // uint256 immutable numRounds;
 
-    GameState public gameState = GameState.NotStarted;
+    // GameState public gameState = GameState.NotStarted;
 
-    uint256 public currentRoundIndex;
-    mapping(uint256 => Round) public rounds;
+    // uint256 public currentRoundIndex;
+    // mapping(uint256 => Round) public rounds;
 
     string public appId;
     string public actionId;
 
 
-    mapping(uint256 => mapping (address => bool)) public roundRegisteredPlayers;
-    mapping(uint256 => uint256) public roundRegisteredPlayersCount;
+    // mapping(uint256 => mapping (address => bool)) public roundRegisteredPlayers;
+    // mapping(uint256 => uint256) public roundRegisteredPlayersCount;
 
-    mapping(uint256 => mapping (address => bytes32)) public roundPlayerCommitments;
+    // mapping(uint256 => mapping (address => bytes32)) public roundPlayerCommitments;
+
 
     /// @param _owner Owner address
     /// @param _worldId The WorldID instance that will verify the proofs
@@ -64,19 +69,43 @@ contract SybilGame is Owned {
         IWorldID _worldId,
         string memory _appId,
         string memory _actionId,
-        uint256 _numRounds,
+        uint32 _numRounds,
         uint256 _commitDuration,
         uint256 _revealDuration
     ) Owned(_owner) {
+        StoreCore.initialize();
+        StoreCore.registerCoreTables();
+
+
         worldId = _worldId;
         appId = _appId;
         actionId = _actionId;
         externalNullifier = abi
             .encodePacked(abi.encodePacked(_appId).hashToField(), _actionId)
             .hashToField();
-        numRounds = _numRounds;
-        commitDuration = _commitDuration;
-        revealDuration = _revealDuration;
+
+        RoundIndex.register();
+
+        Rounds.register();
+
+        Players.register();
+
+        PlayersCount.register();
+
+        Commitments.register();
+
+        GameState.register();
+
+        CommitDuration.register();
+
+        RevealDuration.register();
+
+        RoundCount.register();
+
+
+        RoundCount.set(_numRounds);
+        CommitDuration.set(_commitDuration);
+        RevealDuration.set(_revealDuration);
     }
 
     function signUp(
@@ -84,91 +113,98 @@ contract SybilGame is Owned {
         uint256 root,
         uint256 nullifierHash,
         uint256[8] calldata proof
-    ) external {
-        require(currentRoundIndex == 0 && gameState == GameState.NotStarted, "SybilGame: Game already started");
-        require(roundRegisteredPlayers[0][playerAddress] == false, "SybilGame: Already registered");
+    ) external requireGameState(GameStateType.NOT_STARTED) {
+
+
+    require(Players.get(0, playerAddress) == false, "SybilGame: Already registered");
 
         _verifyPlayerUniqueness(playerAddress, root, nullifierHash, proof);
 
         _registerPlayerForRound(playerAddress, 0);
     }
 
-    function progressToNextRound(string memory question) external onlyOwner {
-        require(rounds[currentRoundIndex].state == RoundState.Reveal || gameState == GameState.NotStarted, "SybilGame: Needs to be in reveal stage or not started to progress");
+  function startGame(string memory question) external onlyOwner requireGameState(GameStateType.NOT_STARTED) {
+    _startGame(question);
+  }
 
-        if (gameState == GameState.NotStarted) {
-            _startGame(question);
-            return;
-        }
+ function progressToNextRound(string memory question) external onlyOwner requireGameState(GameStateType.IN_PROGRESS) requireRoundState(RoundStateType.REVEAL) {
+    uint32 currentRoundIndex = RoundIndex.get();
 
-        require(block.timestamp > rounds[currentRoundIndex].deadline, "SybilGame: Previous stage is still active");
+    uint256 deadline = Rounds.getDeadline(currentRoundIndex);
 
-        if (currentRoundIndex == numRounds - 1) {
-            _endGame();
-            return;
-        }
+    require(block.timestamp > deadline, "SybilGame: Previous stage is still active");
 
-        currentRoundIndex++;
-        _setupNewRound(question);
-
+    if (currentRoundIndex == RoundCount.get() - 1) {
+        _endGame();
+        return;
     }
+
+    RoundIndex.set(currentRoundIndex + 1);
+    _setupNewRound(question);
+}
     
-    function progressRoundToRevealStage(string memory answer) external onlyOwner {
-        require(gameState == GameState.InProgress, "SybilGame: Game needs to be in progress");
-        require(rounds[currentRoundIndex].state == RoundState.Commit, "SybilGame: Needs to be in commit stage to progress");
-        require(block.timestamp > rounds[currentRoundIndex].deadline, "SybilGame: Commit stage is still active");
+  function progressRoundToRevealStage(string memory answer) external onlyOwner requireGameState(GameStateType.IN_PROGRESS) requireRoundState(RoundStateType.COMMIT) {
+    uint32 currentRoundIndex = RoundIndex.get();
+    uint256 deadline = Rounds.getDeadline(currentRoundIndex);
 
-        rounds[currentRoundIndex].state = RoundState.Reveal;
-        rounds[currentRoundIndex].deadline = block.timestamp + revealDuration;  // Set deadline for reveal
-        rounds[currentRoundIndex].answer = answer;
-    }
+    require(block.timestamp > deadline, "SybilGame: Commit stage is still active");
 
-    function commitAnswer(bytes32 _commitment) external {
-        require(rounds[currentRoundIndex].state == RoundState.Commit, "SybilGame: Needs to be in commit stage");
-        require(roundRegisteredPlayers[currentRoundIndex][msg.sender] == true, "SybilGame: Not registered for round");
-        require(block.timestamp < rounds[currentRoundIndex].deadline, "SybilGame: Commit stage is over");
-        
-        roundPlayerCommitments[currentRoundIndex][msg.sender] = _commitment;
-    }
-
-    function revealAnswer(string memory _answer, bytes32 _nonce) external {
-        require(rounds[currentRoundIndex].state == RoundState.Reveal, "SybilGame: Needs to be in reveal stage");
-        require(roundRegisteredPlayers[currentRoundIndex][msg.sender] == true, "SybilGame: Not registered for round");
-        require(block.timestamp < rounds[currentRoundIndex].deadline, "SybilGame: Reveal stage is over");
-        require(keccak256(abi.encode(_answer)) == keccak256(abi.encode(rounds[currentRoundIndex].answer)), "SybilGame: Invalid answer");
-
-        bytes32 commitment = keccak256(abi.encode(_answer, _nonce));
-        require(commitment == roundPlayerCommitments[currentRoundIndex][msg.sender], "SybilGame: No matching commitment");
-
-        _registerPlayerForRound(msg.sender, currentRoundIndex + 1);
-    }
-
-    function currentRound() public view returns (Round memory) {
-        return rounds[currentRoundIndex];
-    }
+    Rounds.setRoundState(currentRoundIndex, RoundStateType.REVEAL);
+    Rounds.setDeadline(currentRoundIndex, block.timestamp + RevealDuration.get());  // Set deadline for reveal
+    Rounds.setAnswer(currentRoundIndex, answer);
+  }
 
 
-    function _startGame(string memory question) internal {
-        gameState = GameState.InProgress;
-        _setupNewRound(question);
-    }
+  function commitAnswer(bytes32 _commitment) external requireGameState(GameStateType.IN_PROGRESS) requireRoundState(RoundStateType.COMMIT) {
+      uint32 currentRoundIndex = RoundIndex.get();
+      RoundStateType roundState = Rounds.getRoundState(currentRoundIndex);
+      uint256 deadline = Rounds.getDeadline(currentRoundIndex);
 
-    function _endGame() internal {
-        gameState = GameState.Completed;
-    }
+      require(Players.getIsRegistered(currentRoundIndex, msg.sender) == true, "SybilGame: Not registered for round");
+      require(roundState == RoundStateType.COMMIT, "SybilGame: Needs to be in commit stage to progress");
+      require(block.timestamp < deadline, "SybilGame: Commit stage is over");
+      
+      Commitments.set(currentRoundIndex, msg.sender, _commitment);
+  }
 
-    function _setupNewRound(string memory question) internal {
-        rounds[currentRoundIndex].state = RoundState.Commit;
-        rounds[currentRoundIndex].deadline = block.timestamp + commitDuration;  // Set deadline for commit
-        rounds[currentRoundIndex].question = question;
-    }
 
-    function _registerPlayerForRound(address playerAddress, uint256 round) internal {
-        roundRegisteredPlayers[round][playerAddress] = true;
-        roundRegisteredPlayersCount[round]++;
+  function revealAnswer(string memory _answer, bytes32 _nonce) external requireGameState(GameStateType.IN_PROGRESS) requireRoundState(RoundStateType.REVEAL) {
+    uint32 currentRoundIndex = RoundIndex.get();
+    uint256 deadline = Rounds.getDeadline(currentRoundIndex);
+    string memory answer = Rounds.getAnswer(currentRoundIndex);
+    bytes32 existingCommitment = Commitments.getCommitment(currentRoundIndex, msg.sender);
 
-        emit PlayerRegisteredForRound(round, playerAddress);
-    }
+    require(Players.getIsRegistered(currentRoundIndex, msg.sender) == true, "SybilGame: Not registered for round");
+    require(block.timestamp < deadline, "SybilGame: Reveal stage is over");
+    require(keccak256(abi.encode(_answer)) == keccak256(abi.encode(answer)), "SybilGame: Invalid answer");
+
+    bytes32 commitment = keccak256(abi.encode(_answer, _nonce));
+    require(commitment == existingCommitment, "SybilGame: No matching commitment");
+
+    _registerPlayerForRound(msg.sender, currentRoundIndex + 1);
+  }
+
+
+
+  function _startGame(string memory _question) internal {
+    GameState.set(GameStateType.IN_PROGRESS);
+    _setupNewRound(_question);
+  }
+
+  function _endGame() internal {
+      GameState.set(GameStateType.FINISHED);
+  }
+
+  function _setupNewRound(string memory _question) internal {
+      Rounds.set(RoundIndex.get(), RoundStateType.COMMIT, block.timestamp + CommitDuration.get(), _question, "");
+  }
+
+
+  function _registerPlayerForRound(address playerAddress, uint32 round) internal {
+    Players.set(round, playerAddress, true);
+    PlayersCount.set(round, PlayersCount.get(round) + 1);
+  }
+
 
     /// @param playerAddress user's wallet address (check README for further details)
     /// @param root The root of the Merkle tree (returned by the JS widget).
@@ -195,5 +231,16 @@ contract SybilGame is Owned {
 
         // We now record the user has done this, so they can't do it again (proof of uniqueness)
         nullifierHashes[nullifierHash] = true;
+    }
+
+    modifier requireGameState(GameStateType _gameState) virtual {
+        require(GameState.get() == _gameState, "SybilGame: Incorrect game state");
+        _;
+    }
+
+    modifier requireRoundState(RoundStateType _roundState) virtual {
+        uint32 currentRoundIndex = RoundIndex.get();
+        require(Rounds.getRoundState(currentRoundIndex) == _roundState, "SybilGame: Incorrect round state");
+        _;
     }
 }

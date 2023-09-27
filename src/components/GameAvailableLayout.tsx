@@ -13,7 +13,10 @@ export const GameAvailableBaseLayout = ({
 }: {
   children: React.ReactNode
 }) => {
-  const { gameAddress, isLoading } = useCurrentGameContractAddress()
+  // const { gameAddress, isLoading } = useCurrentGameContractAddress()
+
+  const isLoading = false
+  const gameAddress = '0xb60971942E4528A811D24826768Bc91ad1383D21'
 
   if (isLoading) {
     return <div>loading...</div>
